@@ -1186,27 +1186,8 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
             <div class="container">
                  <h2 class="category-section-title">Product Categories</h2>
             </div>
-            <section class="categories container">
-                <div class="category" onclick="navigateTo('products', 'course')">
-                    <div class="category-icon-wrapper"><i class="fas fa-graduation-cap category-icon-fa" aria-hidden="true"></i></div>
-                    <p class="category-name">Course</p>
-                    <p class="category-subtitle" id="category-count-course">0 Premium Courses</p>
-                </div>
-                <div class="category" onclick="navigateTo('products', 'subscription')">
-                    <div class="category-icon-wrapper"><i class="fas fa-key category-icon-fa" aria-hidden="true"></i></div>
-                    <p class="category-name">Subscription</p>
-                    <p class="category-subtitle" id="category-count-subscription">0 Premium Services</p>
-                </div>
-                <div class="category" onclick="navigateTo('products', 'software')">
-                    <div class="category-icon-wrapper"><i class="fas fa-laptop-code category-icon-fa" aria-hidden="true"></i></div>
-                    <p class="category-name">Software</p>
-                    <p class="category-subtitle" id="category-count-software">0 Bundle Packages</p>
-                </div>
-                <div class="category" onclick="navigateTo('products', 'ebook')">
-                    <div class="category-icon-wrapper"><i class="fas fa-book-open category-icon-fa" aria-hidden="true"></i></div>
-                    <p class="category-name">Ebook</p>
-                    <p class="category-subtitle" id="category-count-ebook">0 Digital Guides</p>
-                </div>
+            <section class="categories container" id="categories-container">
+                <!-- Categories will be loaded here dynamically -->
             </section>
 
             <section class="product-listings container">
@@ -2410,7 +2391,6 @@ Microsoft-এর অফিসিয়াল Activation Key, ইমেইলে ড
             try {
                 allProductsData = generateDemoProducts().map(p => ({...p, slug: createSlug(p.name)}));
                 if (!Array.isArray(allProductsData)) { throw new Error("Invalid product data format."); }
-                updateCategoryCountsInDOM();
                 if (currentPage === 'home') { displayActualContent(); }
                 if (domElements.pages.products.classList.contains('active')) { filterProducts(currentNavigationContext?.id || 'all', currentNavigationContext?.searchTerm); }
             } catch (error) {
@@ -2490,7 +2470,31 @@ Microsoft-এর অফিসিয়াল Activation Key, ইমেইলে ড
         window.onpopstate = function(event) { if (event.state && event.state.page) { navigateToWithoutHistory(event.state.page, event.state.context, event.state.searchTerm); } else { handleHashChange(false); } };
         function openOffCanvasMenu() { if(domElements.offCanvasMenu) domElements.offCanvasMenu.classList.add('active'); if(domElements.offCanvasOverlay) domElements.offCanvasOverlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
         function closeOffCanvasMenu() { if(domElements.offCanvasMenu) domElements.offCanvasMenu.classList.remove('active'); if(domElements.offCanvasOverlay) domElements.offCanvasOverlay.classList.remove('active'); document.body.style.overflow = ''; }
-        function updateCategoryCountsInDOM() { const dataToUse = (allProductsData && allProductsData.length > 0) ? allProductsData : generateDemoProducts(); const categoryCounts = { course: 0, subscription: 0, software: 0, ebook: 0 }; dataToUse.forEach(product => { if (categoryCounts.hasOwnProperty(product.category)) { categoryCounts[product.category]++; } }); const categoryDisplayMap = { course: { id: 'category-count-course', singular: 'Premium Course', plural: 'Premium Courses' }, subscription: { id: 'category-count-subscription', singular: 'Premium Service', plural: 'Premium Services' }, software: { id: 'category-count-software', singular: 'Bundle Package', plural: 'Bundle Packages' }, ebook: { id: 'category-count-ebook', singular: 'Digital Guide', plural: 'Digital Guides' } }; for (const key in categoryCounts) { const element = document.getElementById(categoryDisplayMap[key].id); if (element) { const count = categoryCounts[key]; element.textContent = `${count} ${count === 1 ? categoryDisplayMap[key].singular : categoryDisplayMap[key].plural}`; } } }
+
+        async function loadCategories() {
+            try {
+                const response = await fetch('categories.json');
+                const categories = await response.json();
+                const container = document.getElementById('categories-container');
+                if (container) {
+                    container.innerHTML = '';
+                    categories.forEach(category => {
+                        const categoryElement = document.createElement('div');
+                        categoryElement.className = 'category';
+                        categoryElement.onclick = () => navigateTo('products', category.name.toLowerCase());
+                        categoryElement.innerHTML = `
+                            <div class="category-icon-wrapper"><i class="${category.icon} category-icon-fa" aria-hidden="true"></i></div>
+                            <p class="category-name">${category.name}</p>
+                            <p class="category-subtitle">${category.subtitle}</p>
+                        `;
+                        container.appendChild(categoryElement);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading categories:', error);
+            }
+        }
+
         function setupSingleImageLoading(imgElement, onImageLoadCallback) { if (!imgElement) return; const container = imgElement.closest('.banner-image-container, .product-card-image-container, .product-detail-main-image-container, .related-product-image-container'); if (!container) { if (imgElement.complete && imgElement.naturalHeight !== 0) { imgElement.classList.add('loaded'); } else { imgElement.onload = () => imgElement.classList.add('loaded'); } if (typeof onImageLoadCallback === 'function') { onImageLoadCallback(); } return; } const skeleton = container.querySelector('.skeleton'); const placeholderText = container.querySelector('.image-placeholder-text'); const handleLoad = () => { if (skeleton) { skeleton.style.display = 'none'; } imgElement.classList.add('loaded'); if (placeholderText) placeholderText.style.display = 'none'; if (typeof onImageLoadCallback === 'function') { onImageLoadCallback(); } }; const handleError = () => { if (skeleton) { skeleton.style.display = 'none'; } imgElement.style.display = 'none'; if (placeholderText) placeholderText.style.display = 'block'; if (typeof onImageLoadCallback === 'function') { onImageLoadCallback(); } }; if (imgElement.complete && imgElement.naturalHeight !== 0) { handleLoad(); } else { imgElement.onload = handleLoad; imgElement.onerror = handleError; if (imgElement.complete && imgElement.naturalHeight !== 0) { handleLoad(); } } }
         function setupImageLoading() { document.querySelectorAll('img.image-fade-in').forEach(img => setupSingleImageLoading(img)); }
         
@@ -2837,6 +2841,7 @@ Microsoft-এর অফিসিয়াল Activation Key, ইমেইলে ড
             loadCartFromLocalStorage(); 
             loadOrdersFromLocalStorage(); 
             await fetchProducts(true);
+            await loadCategories();
             handleHashChange(true); 
             updateOrdersNotification();
             window.addEventListener('hashchange', () => handleHashChange(false)); 

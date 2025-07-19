@@ -368,6 +368,82 @@ $current_total_pending_all_time = getCurrentTotalPendingOrders($all_site_orders_
         .action-btn-text.cancelled { color: #dc3545; }
         .action-btn-text small { font-size: 0.8em; color: var(--text-muted); display: block; line-height: 1.2; }
 
+        .category-management-container {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+        .category-list-card, .add-category-card {
+            flex: 1;
+        }
+        .category-list {
+            list-style-type: none;
+            padding: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .category-item:last-child {
+            border-bottom: none;
+        }
+        .category-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .category-info i {
+            color: var(--primary-color);
+        }
+        .delete-category-form {
+            margin: 0;
+        }
+        .delete-category-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.3rem 0.6rem;
+            border-radius: var(--border-radius);
+            font-size: 0.8rem;
+        }
+        .delete-category-btn:hover {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #58151c !important;
+        }
+        .add-category-form .form-group {
+            margin-bottom: 1rem;
+        }
+        .add-category-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .add-category-form input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+        }
+        .add-category-btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .add-category-btn:hover {
+            background-color: var(--primary-color-darker);
+        }
+
         .alert-message {
             padding: 0.85rem 1.25rem;
             margin-bottom: 1.5rem;
@@ -596,6 +672,57 @@ $current_total_pending_all_time = getCurrentTotalPendingOrders($all_site_orders_
                         <?php endif; ?>
                     </div>
                 </div>
+
+                <div id="manage-categories" class="content-card">
+                    <h2 class="card-title">Manage Categories</h2>
+                    <div class="category-management-container">
+                        <div class="category-list-card">
+                            <h3>Existing Categories</h3>
+                            <ul class="category-list">
+                                <?php
+                                $categories_file = 'categories.json';
+                                if (file_exists($categories_file)) {
+                                    $categories_data = file_get_contents($categories_file);
+                                    $categories = json_decode($categories_data, true);
+                                    if (is_array($categories)) {
+                                        foreach ($categories as $category) {
+                                            echo '<li class="category-item">';
+                                            echo '<div class="category-info">';
+                                            echo '<i class="' . htmlspecialchars($category['icon']) . '"></i>';
+                                            echo '<span>' . htmlspecialchars($category['name']) . '</span>';
+                                            echo '</div>';
+                                            echo '<form class="delete-category-form" action="manage_categories.php" method="POST">';
+                                            echo '<input type="hidden" name="category_name" value="' . htmlspecialchars($category['name']) . '">';
+                                            echo '<button type="submit" name="delete_category" class="delete-category-btn" onclick="return confirm(\'Are you sure you want to delete this category?\');">Delete</button>';
+                                            echo '</form>';
+                                            echo '</li>';
+                                        }
+                                    }
+                                }
+                                ?>
+                            </ul>
+                        </div>
+                        <div class="add-category-card">
+                            <h3>Add New Category</h3>
+                            <form class="add-category-form" action="manage_categories.php" method="POST">
+                                <div class="form-group">
+                                    <label for="category_name">Category Name</label>
+                                    <input type="text" id="category_name" name="category_name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="category_icon">Font Awesome Icon Class</label>
+                                    <input type="text" id="category_icon" name="category_icon" placeholder="e.g., fas fa-book" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="category_subtitle">Subtitle</label>
+                                    <input type="text" id="category_subtitle" name="category_subtitle" required>
+                                </div>
+                                <button type="submit" name="add_category" class="add-category-btn">Add Category</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </main>
     </div>
