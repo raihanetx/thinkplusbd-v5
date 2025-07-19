@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Card & Image URL Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 700px;
+            width: 95%;
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            box-sizing: border-box;
+        }
+        h1, h2.section-title {
+            text-align: center;
+            color: #8F87F1;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group input[type="url"],
+        .form-group input[type="file"],
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        .form-group input[type="file"] {
+            padding: 8px;
+            background-color: #f9f9f9;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #8F87F1;
+            outline: none;
+        }
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .form-group input[type="checkbox"] {
+            margin-right: 8px;
+            transform: scale(1.2);
+            vertical-align: middle;
+        }
+        .checkbox-label {
+            display: inline-block;
+            vertical-align: middle;
+            font-weight: normal;
+            margin-left: 5px;
+            color: #333;
+        }
+        .durations-container {
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            background-color: #f9f9f9;
+        }
+        .duration-item {
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #ddd;
+        }
+        .duration-item:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .duration-item .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .duration-item input.duration-label {
+            flex-grow: 2;
+            min-width: 120px;
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .duration-item input.duration-price {
+            flex-grow: 1;
+            min-width: 70px;
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+         .duration-item button.remove-duration-btn {
+            padding: 8px 15px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            display: block; 
+            width: 100%; 
+        }
+        .duration-item button.remove-duration-btn:hover {
+            background-color: #c0392b;
+        }
+        button,
+        button[type="submit"], #addDurationBtn, #copyCodeBtn, #copyImgUrlBtn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #8F87F1;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+            box-sizing: border-box;
+        }
+        button:hover,
+        button[type="submit"]:hover {
+            background-color: #7a70d8;
+        }
+        #addDurationBtn {
+            background-color: #2ecc71;
+            margin-top: 15px;
+            width: auto;
+            padding: 10px 20px;
+            font-size: 1rem;
+            display: inline-block;
+        }
+        #addDurationBtn:hover {
+            background-color: #27ae60;
+        }
+        #generatedCodeContainer, #generatedImageUrlContainer {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #2d2d2d;
+            color: #f0f0f0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', Courier, monospace;
+            border: 1px solid #444;
+            font-size: 0.9em;
+        }
+        #copyCodeBtn, #copyImgUrlBtn {
+            background-color: #3498db;
+            margin-top: 15px;
+        }
+        #copyCodeBtn:hover, #copyImgUrlBtn:hover {
+            background-color: #2980b9;
+        }
+        .hidden {
+            display: none;
+        }
+        .info-text {
+            font-size: 0.85em;
+            color: #777;
+            margin-top: 5px;
+            display: block;
+        }
+        #generatedImageUrl {
+            font-weight: bold;
+            color: #90ee90;
+        }
+    </style>
+</head>
+<body>
+    <!-- Image URL Generator Section -->
+    <div class="container" id="imageGeneratorContainer">
+        <h2 class="section-title">Image URL Generator</h2>
+        <p style="text-align: center; margin-bottom: 20px; font-size: 0.9em; color: #555;">
+            ফোল্ডারের নাম দিন এবং একটি ছবি আপলোড করুন। ছবির পাথ স্বয়ংক্রিয়ভাবে তৈরি হয়ে যাবে।
+        </p>
+        <form id="imageUrlGeneratorForm">
+            <div class="form-group">
+                <label for="folderName">Folder Name (e.g., product_images):</label>
+                <input type="text" id="folderName" value="product_images">
+            </div>
+            <!-- NEW: File input for uploading image -->
+            <div class="form-group">
+                <label for="imageFileInput">Choose Image File:</label>
+                <input type="file" id="imageFileInput" accept="image/*" required>
+            </div>
+             <!-- This input is now just for display -->
+            <div class="form-group">
+                <label for="imageFileName">Detected File Name:</label>
+                <input type="text" id="imageFileName" readonly placeholder="No file chosen...">
+            </div>
+        </form>
+        <div id="generatedImageUrlContainer" class="hidden">
+            <h3>Generated Image Path:</h3>
+            <p><code id="generatedImageUrl"></code></p>
+            <button type="button" id="copyImgUrlBtn">Copy Image Path</button>
+        </div>
+    </div>
+
+    <!-- Product Card Code Generator Section -->
+    <div class="container" id="productCardContainer">
+        <h1 class="section-title">Product Card Code Generator</h1>
+        <form id="productForm">
+            <div class="form-group">
+                <label for="productId">Product ID (Unique Number):</label>
+                <input type="number" id="productId" required placeholder="e.g., 501">
+            </div>
+            <div class="form-group">
+                <label for="productName">Product Name:</label>
+                <input type="text" id="productName" required placeholder="e.g., Awesome Course">
+            </div>
+            <div class="form-group">
+                <label for="productDescription">Short Description (for card):</label>
+                <textarea id="productDescription" required placeholder="e.g., Learn to build amazing things..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="productLongDescription">Long Description (for detail page):</label>
+                <textarea id="productLongDescription" required placeholder="e.g., This course covers A, B, and C in detail..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="productCategory">Category:</label>
+                <select id="productCategory" required>
+                    <option value="" disabled selected>Select a category</option>
+                    <option value="course">Course</option>
+                    <option value="subscription">Subscription</option>
+                    <option value="software">Software</option>
+                    <option value="ebook">Ebook</option>
+                </select>
+            </div>
+            <div class="form-group" id="priceGroup">
+                <label for="productPrice">Price (if not a subscription with durations):</label>
+                <input type="number" id="productPrice" step="0.01" placeholder="e.g., 1200 or 0 for subscriptions with durations">
+            </div>
+            <div class="form-group">
+                <label for="productImage">Image URL/Path (auto-filled from generator):</label>
+                <input type="text" id="productImage" required placeholder="Generated path will appear here or paste directly">
+            </div>
+            <div class="form-group">
+                <input type="checkbox" id="isFeatured" name="isFeatured">
+                <label for="isFeatured" class="checkbox-label">Is Featured (Show on Homepage)?</label>
+            </div>
+            <div class="form-group">
+                <input type="checkbox" id="isLastProduct" name="isLastProduct">
+                <label for="isLastProduct" class="checkbox-label">Is this the LAST product in the array?</label>
+                <p class="info-text">If checked, the generated code will NOT have a trailing comma.</p>
+            </div>
+            <div id="durationsSection" class="form-group hidden">
+                <label>Durations (for Subscriptions):</label>
+                <div class="durations-container" id="durationsContainer">
+                    <!-- Duration items will be added here -->
+                </div>
+                <button type="button" id="addDurationBtn">Add Duration</button>
+            </div>
+            <button type="submit">Generate Product Code</button>
+        </form>
+
+        <div id="generatedCodeContainer" class="hidden">
+            <h2>Generated Product Code:</h2>
+            <pre><code id="generatedCode"></code></pre>
+            <button type="button" id="copyCodeBtn">Copy Product Code</button>
+        </div>
+    </div>
+
+    <script>
+        // Product Card Generator Script
+        const form = document.getElementById('productForm');
+        const categorySelect = document.getElementById('productCategory');
+        const durationsSection = document.getElementById('durationsSection');
+        const durationsContainer = document.getElementById('durationsContainer');
+        const addDurationBtn = document.getElementById('addDurationBtn');
+        const priceGroup = document.getElementById('priceGroup');
+        const productPriceInput = document.getElementById('productPrice');
+        const isLastProductCheckbox = document.getElementById('isLastProduct');
+        const generatedCodeContainer = document.getElementById('generatedCodeContainer');
+        const generatedCodeElement = document.getElementById('generatedCode');
+        const copyCodeBtn = document.getElementById('copyCodeBtn');
+
+        categorySelect.addEventListener('change', function() {
+            if (this.value === 'subscription') {
+                durationsSection.classList.remove('hidden');
+                priceGroup.classList.add('hidden');
+                productPriceInput.value = 0;
+                productPriceInput.required = false;
+                 if (durationsContainer.children.length === 0) {
+                    addDurationField();
+                }
+            } else {
+                durationsSection.classList.add('hidden');
+                priceGroup.classList.remove('hidden');
+                productPriceInput.required = true;
+                durationsContainer.innerHTML = '';
+            }
+        });
+
+        function addDurationField() {
+            const durationItem = document.createElement('div');
+            durationItem.className = 'duration-item';
+            durationItem.innerHTML = `
+                <div class="input-group">
+                    <input type="text" placeholder="Duration Label (e.g., 1 Month)" required class="duration-label">
+                    <input type="number" step="0.01" placeholder="Price (e.g., 350)" required class="duration-price">
+                </div>
+                <button type="button" class="remove-duration-btn">Remove</button>
+            `;
+            durationsContainer.appendChild(durationItem);
+            durationItem.querySelector('.remove-duration-btn').addEventListener('click', function() {
+                this.parentElement.remove();
+            });
+        }
+
+        addDurationBtn.addEventListener('click', addDurationField);
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const toTemplateLiteral = (str) => `\`${str.replace(/\\/g, '\\\\').replace(/`/g, '\\`')}\``;
+            const product = {
+                id: parseInt(document.getElementById('productId').value),
+                name: toTemplateLiteral(document.getElementById('productName').value),
+                description: toTemplateLiteral(document.getElementById('productDescription').value),
+                longDescription: toTemplateLiteral(document.getElementById('productLongDescription').value),
+                category: `"${document.getElementById('productCategory').value}"`,
+                price: parseFloat(document.getElementById('productPrice').value) || 0,
+                image: `"${document.getElementById('productImage').value}"`,
+                isFeatured: document.getElementById('isFeatured').checked
+            };
+            const category = document.getElementById('productCategory').value;
+            if (category === 'subscription') {
+                const durationItems = durationsContainer.querySelectorAll('.duration-item');
+                if (durationItems.length > 0) {
+                    product.durations = [];
+                    durationItems.forEach(item => {
+                        const label = item.querySelector('.duration-label').value;
+                        const price = parseFloat(item.querySelector('.duration-price').value);
+                        if (label && !isNaN(price)) {
+                            product.durations.push({ label: toTemplateLiteral(label), price: price });
+                        }
+                    });
+                    product.price = product.durations.length > 0 ? 0 : (parseFloat(document.getElementById('productPrice').value) || 0);
+                } else {
+                     product.price = parseFloat(document.getElementById('productPrice').value) || 0;
+                }
+            }
+            let codeString = `{\n`;
+            const keys = Object.keys(product);
+            keys.forEach((key, index) => {
+                if (key === 'durations' && Array.isArray(product[key])) {
+                    codeString += `    ${key}: [\n`;
+                    product[key].forEach((duration, dIndex) => {
+                        codeString += `        { label: ${duration.label}, price: ${duration.price} }${dIndex < product[key].length - 1 ? ',' : ''}\n`;
+                    });
+                    codeString += `    ]`;
+                } else {
+                    codeString += `    ${key}: ${product[key]}`;
+                }
+                if (index < keys.length - 1) {
+                    codeString += `,\n`;
+                } else {
+                    codeString += `\n`;
+                }
+            });
+            const isLast = isLastProductCheckbox.checked;
+            codeString += `}${isLast ? '' : ','}\n`;
+            codeString += `// ⬇️ Add new product object below this line, inside the array ⬇️`;
+            generatedCodeElement.textContent = codeString;
+            generatedCodeContainer.classList.remove('hidden');
+        });
+
+        copyCodeBtn.addEventListener('click', function() {
+            navigator.clipboard.writeText(generatedCodeElement.textContent)
+                .then(() => alert('Product code copied to clipboard!'))
+                .catch(err => {
+                    console.error('Failed to copy product code: ', err);
+                    alert('Failed to copy product code. Please copy manually.');
+                });
+        });
+
+        if (categorySelect.value === 'subscription') {
+            durationsSection.classList.remove('hidden');
+            priceGroup.classList.add('hidden');
+            productPriceInput.value = 0;
+            productPriceInput.required = false;
+            if (durationsContainer.children.length === 0) addDurationField();
+        }
+
+        // --- Image URL Generator Script (UPDATED) ---
+        const folderNameInput = document.getElementById('folderName');
+        const imageFileInput = document.getElementById('imageFileInput'); // New file input
+        const imageFileNameInput = document.getElementById('imageFileName'); // Now for display
+        const generatedImageUrlContainer = document.getElementById('generatedImageUrlContainer');
+        const generatedImageUrlElement = document.getElementById('generatedImageUrl');
+        const copyImgUrlBtn = document.getElementById('copyImgUrlBtn');
+        const productImageInputForCard = document.getElementById('productImage');
+        const DEFAULT_HOST_PATH = "";
+
+        // Function to generate the path
+        function generatePath() {
+            const folderName = folderNameInput.value.trim();
+            const file = imageFileInput.files[0];
+            
+            if (!file) {
+                imageFileNameInput.value = "No file chosen...";
+                return;
+            }
+
+            const fileName = file.name;
+            imageFileNameInput.value = fileName; // Show detected file name
+
+            let basePath = DEFAULT_HOST_PATH.trim();
+            if (basePath && !basePath.endsWith('/')) basePath += '/';
+
+            let processedFolderName = folderName;
+            if (processedFolderName && !processedFolderName.endsWith('/')) {
+                processedFolderName += '/';
+            }
+
+            let fullPath = basePath + processedFolderName + fileName;
+            fullPath = fullPath.replace(/([^:])\/{2,}/g, "$1/");
+
+            generatedImageUrlElement.textContent = fullPath;
+            generatedImageUrlContainer.classList.remove('hidden');
+
+            if (productImageInputForCard) {
+                productImageInputForCard.value = fullPath;
+                productImageInputForCard.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }
+
+        // Generate path automatically when a file is chosen or folder name changes
+        imageFileInput.addEventListener('change', generatePath);
+        folderNameInput.addEventListener('input', generatePath);
+
+        copyImgUrlBtn.addEventListener('click', function() {
+            navigator.clipboard.writeText(generatedImageUrlElement.textContent)
+                .then(() => alert('Image Path copied to clipboard!'))
+                .catch(err => {
+                    console.error('Failed to copy image path: ', err);
+                    alert('Failed to copy image path. Please copy manually.');
+                });
+        });
+    </script>
+</body>
+</html>
